@@ -7,6 +7,21 @@
     <link>https://github.com/Bbbtt04/screensaver</link>
     <description>Agent永动机 auto-update feed</description>
     <language>zh-cn</language>
-    <!-- Items will be added by scripts/release.sh -->
+
+    <item>
+      <title>Version 0.2.1</title>
+      <pubDate>Tue, 09 Jun 2026 02:42:02 +0000</pubDate>
+      <sparkle:version>3</sparkle:version>
+      <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/Bbbtt04/screensaver/releases/download/v0.2.1/Agent永动机-v0.2.1.dmg"
+        sparkle:version="3"
+        sparkle:shortVersionString="0.2.1"
+        length="2028424"
+        type="application/octet-stream"
+        sparkle:edSignature="fdQN3p+U8/YLLZyKOIMO+Dtbgxzlu9sxKRktpoKjaG31o1Dv1i6Z756MKSkBnGjqWXM9wn6CO2s0o2D0QNz3Cw=="
+      />
+    </item>
   </channel>
 </rss>
