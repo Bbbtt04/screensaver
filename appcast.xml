@@ -15,7 +15,7 @@
       <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <enclosure
-        url="https://github.com/Bbbtt04/screensaver/releases/download/v0.2.1/Agent永动机-v0.2.1.dmg"
+        url="https://raw.githubusercontent.com/Bbbtt04/screensaver/main/releases/v0.2.1/AgentYongdongji-v0.2.1.dmg"
         sparkle:version="3"
         sparkle:shortVersionString="0.2.1"
         length="2028424"
