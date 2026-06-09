@@ -19,6 +19,8 @@ DMG_SRC="$ROOT_DIR/dist/${APP_NAME}.dmg"
 DMG_VERSIONED="$ROOT_DIR/dist/${DMG_NAME}"
 APPCAST="$ROOT_DIR/appcast.xml"
 TAG="v${VERSION}"
+APPCAST_URL="${APPCAST_URL:-https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/appcast.xml}"
+DOWNLOAD_BASE_URL="${DOWNLOAD_BASE_URL:-https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/${TAG}}"
 
 # ── 前置检查 ────────────────────────────────────────────────────────────
 echo "==> Checking prerequisites"
@@ -26,6 +28,31 @@ echo "==> Checking prerequisites"
 if ! command -v gh &>/dev/null; then
   echo "ERROR: gh CLI not found. Install: brew install gh && gh auth login" >&2
   exit 1
+fi
+
+if ! gh auth status &>/dev/null; then
+  echo "ERROR: gh is not authenticated. Run: gh auth login" >&2
+  exit 1
+fi
+
+REPO_VISIBILITY=$(gh api "repos/${GITHUB_OWNER}/${GITHUB_REPO}" --jq '.visibility')
+CAN_PUSH=$(gh api "repos/${GITHUB_OWNER}/${GITHUB_REPO}" --jq '.permissions.push')
+if [[ "$CAN_PUSH" != "true" ]]; then
+  echo "ERROR: GitHub token cannot push to ${GITHUB_OWNER}/${GITHUB_REPO}." >&2
+  exit 1
+fi
+
+if ! gh api "repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases" --method GET >/dev/null; then
+  echo "ERROR: gh cannot access GitHub Releases for ${GITHUB_OWNER}/${GITHUB_REPO}." >&2
+  echo "Run: gh auth refresh -h github.com -s repo" >&2
+  echo "Or set DOWNLOAD_BASE_URL/APPCAST_URL to an internal static file host and replace the upload step." >&2
+  exit 1
+fi
+
+if [[ "$REPO_VISIBILITY" != "public" && "$APPCAST_URL" == https://raw.githubusercontent.com/* ]]; then
+  echo "WARNING: ${GITHUB_OWNER}/${GITHUB_REPO} is ${REPO_VISIBILITY}."
+  echo "Sparkle clients usually cannot download appcast.xml or release DMGs from a private GitHub repo without authentication."
+  echo "This release can verify the pipeline, but end-user auto-update requires public appcast/DMG URLs."
 fi
 
 if [[ ! -x "$SPARKLE_BIN/sign_update" ]]; then
@@ -39,15 +66,22 @@ if git tag -l "$TAG" | grep -q "$TAG"; then
   exit 1
 fi
 
+if git ls-remote --tags origin "$TAG" | grep -q "$TAG"; then
+  echo "ERROR: remote git tag $TAG already exists." >&2
+  exit 1
+fi
+
 if ! git diff --quiet || ! git diff --cached --quiet; then
   echo "ERROR: Working tree is dirty. Commit or stash changes first." >&2
   exit 1
 fi
 
+git push --dry-run origin HEAD:main >/dev/null
+
 # ── 构建 DMG ─────────────────────────────────────────────────────────────
 echo "==> Building version $VERSION (build $BUILD_NUMBER)"
 VERSION="$VERSION" BUILD_NUMBER="$BUILD_NUMBER" \
-  GITHUB_OWNER="$GITHUB_OWNER" GITHUB_REPO="$GITHUB_REPO" \
+  GITHUB_OWNER="$GITHUB_OWNER" GITHUB_REPO="$GITHUB_REPO" APPCAST_URL="$APPCAST_URL" \
   bash "$SCRIPT_DIR/package-internal.sh"
 
 cp "$DMG_SRC" "$DMG_VERSIONED"
@@ -55,9 +89,9 @@ echo "    DMG: $DMG_VERSIONED"
 
 # ── EdDSA 签名 ────────────────────────────────────────────────────────────
 echo "==> Signing DMG with EdDSA (reads private key from Keychain)"
-SIGNATURE=$("$SPARKLE_BIN/sign_update" "$DMG_VERSIONED")
+SIGNATURE=$("$SPARKLE_BIN/sign_update" -p "$DMG_VERSIONED")
 FILE_SIZE=$(wc -c < "$DMG_VERSIONED" | tr -d ' ')
-DOWNLOAD_URL="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/${TAG}/${DMG_NAME}"
+DOWNLOAD_URL="${DOWNLOAD_BASE_URL%/}/${DMG_NAME}"
 
 echo "    Signature: $SIGNATURE"
 echo "    Size:      $FILE_SIZE bytes"
@@ -112,4 +146,4 @@ gh release create "$TAG" \
 echo ""
 echo "✅ Released $TAG"
 echo "   Download: $DOWNLOAD_URL"
-echo "   Appcast:  https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/appcast.xml"
+echo "   Appcast:  $APPCAST_URL"

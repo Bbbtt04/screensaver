@@ -10,6 +10,7 @@ BUILD_NUMBER="${BUILD_NUMBER:-2}"
 # === GitHub Release 配置 ===
 GITHUB_OWNER="${GITHUB_OWNER:-Bbbtt04}"
 GITHUB_REPO="${GITHUB_REPO:-screensaver}"
+APPCAST_URL="${APPCAST_URL:-https://raw.githubusercontent.com/$GITHUB_OWNER/$GITHUB_REPO/main/appcast.xml}"
 
 # Sparkle EdDSA 公钥（由 generate_keys 生成）
 SPARKLE_PUBLIC_KEY="${SPARKLE_PUBLIC_KEY:-VUIugHtxsVA6LW6zrv/MCiFtHU5z9NGLiI7rhTvS2SY=}"
@@ -94,7 +95,7 @@ cat > "$APP_PATH/Contents/Info.plist" <<EOF
   <key>LSUIElement</key>
   <true/>
   <key>SUFeedURL</key>
-  <string>https://raw.githubusercontent.com/$GITHUB_OWNER/$GITHUB_REPO/main/appcast.xml</string>
+  <string>$APPCAST_URL</string>
   <key>SUPublicEDKey</key>
   <string>$SPARKLE_PUBLIC_KEY</string>
   <key>SUEnableAutomaticChecks</key>

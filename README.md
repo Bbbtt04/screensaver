@@ -97,6 +97,13 @@ scripts/package-internal.sh
 VERSION=0.2.1 BUILD_NUMBER=3 scripts/package-internal.sh
 ```
 
+若更新源不走 GitHub raw，可指定 Sparkle appcast 地址：
+
+```sh
+APPCAST_URL=https://download.example.com/agent-yongdongji/appcast.xml \
+VERSION=0.2.1 BUILD_NUMBER=3 scripts/package-internal.sh
+```
+
 产物位置：
 
 ```text
@@ -104,6 +111,24 @@ dist/Agent永动机.dmg
 ```
 
 这是 ad-hoc signed 的内部测试版，没有 Developer ID 签名和 notarization。测试用户第一次打开时可能需要右键选择 `打开`，并且仍需要给 `/Applications/Agent永动机.app` 添加「辅助功能」和「输入监控」权限。
+
+## Auto Update
+
+客户端已集成 Sparkle，菜单栏和关于窗口里都有 `检查更新...` 入口。发布新版本时使用：
+
+```sh
+VERSION=0.2.1 BUILD_NUMBER=3 scripts/release.sh
+```
+
+`scripts/release.sh` 会构建 DMG、用 Sparkle EdDSA 私钥签名、更新 `appcast.xml`、提交 tag，并创建 GitHub Release。
+
+如果仓库是私有的，Sparkle 客户端通常无法匿名下载 GitHub raw appcast 或 Release DMG。内部测试可先验证发布流程；真正给用户自动更新时，请使用公开仓库，或把 `appcast.xml` 和 DMG 放到 App 可直接访问的内部 HTTPS 静态下载地址：
+
+```sh
+APPCAST_URL=https://download.example.com/agent-yongdongji/appcast.xml \
+DOWNLOAD_BASE_URL=https://download.example.com/agent-yongdongji/releases/v0.2.1 \
+VERSION=0.2.1 BUILD_NUMBER=3 scripts/release.sh
+```
 
 ## MVP Limits
 
