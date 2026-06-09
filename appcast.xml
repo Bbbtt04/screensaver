@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+     xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Agent永动机 Updates</title>
+    <link>https://github.com/Bbbtt04/screensaver</link>
+    <description>Agent永动机 auto-update feed</description>
+    <language>zh-cn</language>
+    <!-- Items will be added by scripts/release.sh -->
+  </channel>
+</rss>

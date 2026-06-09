@@ -1,0 +1,8 @@
+.build/
+.swiftpm/
+DerivedData/
+.DS_Store
+scripts/sparkle-bin/
+dist/
+assets/AppIcon.icns
+assets/AppIcon.iconset/
